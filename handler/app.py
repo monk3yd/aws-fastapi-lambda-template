@@ -1,3 +1,5 @@
+# https://medium.com/towards-data-science/fastapi-aws-robust-api-part-1-f67ae47390f9
+
 import json
 
 from fastapi import FastAPI
