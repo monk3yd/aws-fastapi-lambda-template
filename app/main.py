@@ -13,11 +13,19 @@ from mangum import Mangum
 app = FastAPI(title="fastapi-lambda-template")
 
 
-@app.post("/")
+@app.get("/")
 def get_root():
     return {
         "statusCode": 200,
-        "message": "root is working",
+        "message": "root GET method is working",
+    }
+
+
+@app.post("/")
+def post_to_root():
+    return {
+        "statusCode": 200,
+        "message": "root POST method is working"
     }
 
 
