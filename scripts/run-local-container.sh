@@ -4,7 +4,7 @@
 
 # Variables
 IMAGE_NAME="fastapi-lambda-image"
-IMAGE_TAG="latest"
+IMAGE_TAG="main"
 CONTAINER_NAME="fastapi-lambda-container"
 HOST_MACHINE_PORT=9000
 CONTAINER_PORT=8080
