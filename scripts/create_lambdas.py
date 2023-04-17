@@ -21,7 +21,7 @@ PROJECT_NAME = os.getenv("PROJECT_NAME")
 WORKFLOW: str = "ecr"
 
 LAMBDA_NAME = PROJECT_NAME
-LAMBDA_RUNTIME = "python3.9"
+LAMBDA_RUNTIME = "python3.11"
 LAMBDA_HANDLER = "main.handler"
 LAMBDA_TIMEOUT = 300  # 5min
 
