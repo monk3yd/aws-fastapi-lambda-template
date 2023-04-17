@@ -1,16 +1,31 @@
-ARG FUNCTION_DIR="/home/app"
+FROM public.ecr.aws/docker/library/ubuntu:latest
+# FROM public.ecr.aws/ubuntu/ubuntu:22.04
 
-FROM public.ecr.aws/lambda/python:3.9
+RUN apt-get update
+RUN apt-get install -y \
+    python3 \
+    python3-pip
 
-ARG FUNCTION_DIR
+ARG FUNCTION_DIR="/home/app/"
 
-# Create function directory
 RUN mkdir -p ${FUNCTION_DIR}
-WORKDIR ${FUNCTION_DIR} 
 
-COPY ./requirements.txt ${FUNCTION_DIR} 
+COPY requirements.txt ${FUNCTION_DIR}
 RUN pip3 install -r ${FUNCTION_DIR}/requirements.txt
 
-COPY ./app/main.py ${FUNCTION_DIR} 
+# Copy function code
+COPY ./app/main.py ${FUNCTION_DIR}
 
-CMD ["app.handler"]
+# Install Lambda Runtime Interface Client for Python
+RUN python3 -m pip install awslambdaric --target ${FUNCTION_DIR}
+
+WORKDIR ${FUNCTION_DIR}
+
+# (Optional) Add Lambda Runtime Interface Emulator and use a script in the ENTRYPOINT for simpler local runs
+ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie /usr/bin/aws-lambda-rie
+COPY docker/entrypoint.sh /
+RUN chmod 755 /usr/bin/aws-lambda-rie /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+CMD [ "main.handler" ]
+

@@ -18,12 +18,13 @@ PROJECT_NAME = os.getenv("PROJECT_NAME")
 # local : uploads source zip file from local system when creating lambda
 # s3 : use prestored source zip file within S3
 # ecr : use docker image saved within ECR repository
-WORKFLOW: str = "s3"
+WORKFLOW: str = "ecr"
 
 LAMBDA_NAME = PROJECT_NAME
 LAMBDA_RUNTIME = "python3.9"
 LAMBDA_HANDLER = "main.handler"
 LAMBDA_TIMEOUT = 300  # 5min
+
 
 # ======================================
 
@@ -70,16 +71,6 @@ def main():
             #     "Variables": {"Name": "helloWorldLambda", "Environment": "prod"}
             # },
         }
-
-        # Merge
-        lambda_configuration = basic_config | workflow_config
-
-        response = lambda_client.create_function(**lambda_configuration)
-        logger.info(f"Lambda creation response: {response}")
-
-        with open(f"scripts/data/{filename}", "w") as file:
-            file.write(json.dumps(response))
-
 
     if WORKFLOW == "ecr":
         branches = ["main", "experimental"]
