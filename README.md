@@ -1,4 +1,5 @@
 [AWS FastAPI Lambda - Medium](https://medium.com/towards-data-science/fastapi-aws-robust-api-part-1-f67ae47390f9)
+[AWS FastAPI Lambda Security - Medium](https://towardsdatascience.com/fastapi-aws-secure-api-part-2-1123bff28b55)
 
 ## Steps to follow for CICD setup:
 
@@ -31,6 +32,8 @@ pip3 install -r requirements.txt
 export AWS_ACCOUNT_ID="134284459147"
 export AWS_REGION_NAME="us-east-1"
 export PROJECT_NAME="github-to-lambda"
+export AWS_ACCESS_KEY_ID="aaabbcc0001122233"
+export AWS_SECRET_ACCESS_KEY="aaabbcc0001122233"
 ```
 
 5. Test API locally
@@ -39,19 +42,19 @@ uvicorn main:app --reload
 ```
 See [docs](http://localhost:8000/docs)
 
-6. Package code
+6. Create ECR for new lambda project
 ```bash
-bash scripts/package-lambda.sh
+bash scripts/create-ecr-repo.sh
 ```
 
-7. Upload code to S3
+7. Deploy init docker images (main/experimental) to ECR
 ```bash
-bash scripts/package-upload-to-s3.sh
+bash scripts/deploy-images-to-ecr.sh
 ```
 
-8. Create lambda function through AWS console, set handler as main.handler and set new role with basic lambda permissions.
+8. Create lambda functions (main/experimental) and link them to respective image within ECR
 ```bash
-python3 scripts/create_lambda.py
+python3 scripts/create_lambdas.py
 ```
 
 * NOTE: if the AWS account is new we need to first run:
@@ -59,22 +62,33 @@ python3 scripts/create_lambda.py
 python3 scripts/create_iam_lambda_execution.py
 ```
 
-9. Update the lambda function to make sure it uses the packaged code from S3
-```bash
-bash scripts/update-lambda.sh
-```
+9. Define github actions secrets within project repository:
+  - AWS_ACCOUNT_ID
+  - AWS_ACCESS_KEY_ID
+  - AWS_SECRET_ACCESS_KEY
+  - REGION_NAME
+  - PROJECT_NAME
 
-10. Create REST API in API Gateway through AWS console
+10. Push to main or experimental branches within github, the lambda function will update accordingly
+
+11. Create REST API in API Gateway through AWS console
 > Now we need to configure the integration point for our request methods. To use a Lambda function as our integration point for ANY type of request (i.e., GET, POST, PATCH, DELETE, etc.), we will create a Method (to handle the root path) and a child Resource (to handle all child paths). We will configure them to handle any requests made to API Gateway by using the Lambda proxy integration [1].
 
   - Create method
   - Create resource
 
-11. Configure lambda function as a proxy to forward requests from API Gateway to Amazon Lambda
+12. Configure lambda function as a proxy to forward requests from API Gateway to Amazon Lambda
 
-12. Deploy API
+13. Deploy API
 > Since our Lambda is now configured, we can deploy the API. We can name it dev stage. The deployment is crucial to make the Lambda function integration active.
 
+14. Configure methods & resources to require API key
+
+15. Create API key
+
+16. Create API usage plan
+
+17. Redeploy
 
 ## Resources
 See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
