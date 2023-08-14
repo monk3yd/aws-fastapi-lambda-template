@@ -3,47 +3,44 @@
 # For local run: uvicorn main:app --reload
 # Check: http://localhost:8000/docs
 
-import json
-import sys
-
+from pydantic import BaseModel
 from fastapi import FastAPI
 from mangum import Mangum
+
+from loguru import logger
 
 
 app = FastAPI(title="fastapi-lambda-template")
 
 
+# Move to models.py or models/ dir as necessary
+class User(BaseModel):
+    id: int
+    username: str
+
+@app.get("/user/{id}")
+def read_user_info(id: int):
+    logger.debug(f"Read user ID: {id}")
+    return {
+        "statusCode": 200,
+        "message": "User found",
+    }
+
+
+@app.post("/user")
+def create_user(user: User):
+    return {
+        "statusCode": 200,
+        "message": "User created",
+        "user": user.dict()
+    }
+
+
 @app.get("/")
-def get_root():
+def root():
     return {
         "statusCode": 200,
-        "message": "root GET method is working",
+        "message": "root GET method OK"
     }
-
-
-@app.post("/")
-def post_to_root():
-    return {
-        "statusCode": 200,
-        "message": "root POST method is working"
-    }
-
-
-@app.get("/{var}")
-def search_var(var: str = None):
-    if var is None:
-        return {
-            "statusCode": 400,
-            "message": "Please enter var."
-        }
-
-    # TODO: Validate var
-
-    return {
-        "statusCode": 200,
-        "message": "200OK",
-        "data": json.dumps({})
-    }
-
 
 handler = Mangum(app)
