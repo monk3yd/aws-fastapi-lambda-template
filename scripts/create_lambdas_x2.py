@@ -5,7 +5,6 @@ import json
 import os
 
 from loguru import logger
-from utils import generate_role_name
 
 
 # ------------- AWS Settings ----------------
@@ -23,7 +22,7 @@ WORKFLOW: str = "ecr"
 
 LAMBDA_NAME = PROJECT_NAME
 LAMBDA_RUNTIME = "python3.11"
-LAMBDA_HANDLER = "handler.app"
+LAMBDA_HANDLER = "main.handler"
 LAMBDA_TIMEOUT = 300  # 5min
 
 
@@ -40,9 +39,8 @@ def main():
     iam_client = session.client("iam")
     lambda_client = session.client("lambda")
 
-    role_name = generate_role_name(PROJECT_NAME)
     # Import IAM role for basic lambda execution
-    role = iam_client.get_role(RoleName=f"LambdaBasicExecution{role_name}")
+    role = iam_client.get_role(RoleName="LambdaBasicExecution")
 
     if WORKFLOW == "local":
         # Upload directly zip code and dependencies
@@ -75,9 +73,7 @@ def main():
         }
 
     if WORKFLOW == "ecr":
-        # TODO:
-        # branches = ["main", "experimental"]
-        branches = ["main"]
+        branches = ["main", "experimental"]
         for branch in branches:
             # Main lambda
             with open(f"scripts/data/ecr_repo_{branch}.txt", "r") as file:
