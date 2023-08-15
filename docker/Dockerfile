@@ -1,8 +1,10 @@
+# Python Docker Image
+
 # Using an alternative base image (python) with the runtime interface client (awslambdaric)
 # https://docs.aws.amazon.com/lambda/latest/dg/python-image.html#python-image-instructions
 
 # Define custom function directory
-ARG FUNCTION_DIR="/function/"
+ARG FUNCTION_DIR="/monk3yd/"
 
 FROM python:3.11 as build-image
 
@@ -10,8 +12,17 @@ FROM python:3.11 as build-image
 ARG FUNCTION_DIR
 RUN mkdir -p ${FUNCTION_DIR}
 
+# create a dedicated group and user
+RUN groupadd -r monk3yd && useradd -g monk3yd monk3yd
+
+# set ownership and permissions
+RUN chown -R monk3yd:monk3yd ${FUNCTION_DIR}
+
+# change to non-root user (some images already have a generic user)
+USER monk3yd
+
 # Copy function code
-COPY ./app/main.py ${FUNCTION_DIR}
+COPY ./app/* ${FUNCTION_DIR}
 
 # Install the function's dependencies
 RUN pip install \
@@ -21,6 +32,8 @@ RUN pip install \
 # Use a slim version of the base Python image to reduce the final image size
 FROM python:3.11-slim
 
+# Set environment variables
+ENV KEY=RFTL
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR
 # Set working directory to function root directory

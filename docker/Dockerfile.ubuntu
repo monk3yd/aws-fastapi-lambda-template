@@ -1,14 +1,26 @@
+# Ubuntu Docker Image
 FROM public.ecr.aws/docker/library/ubuntu:22.04
 
 RUN apt-get update && \
     apt-get install -y \
     python3 \
-    python3-pip \
+    python3-pip && \
     apt-get clean
 
-ARG FUNCTION_DIR="/home/app/"
-
+ARG FUNCTION_DIR="/monk3yd/"
 RUN mkdir -p ${FUNCTION_DIR}
+
+# create a dedicated group and user
+# RUN groupadd -r monk3yd && useradd -g monk3yd monk3yd
+
+# set ownership and permissions
+# RUN chown -R monk3yd:monk3yd ${FUNCTION_DIR}
+
+# change to non-root user (some images already have a generic user)
+# USER monk3yd
+
+# Set environment variables
+ENV KEY=RFTL
 
 COPY requirements.txt ${FUNCTION_DIR}
 RUN pip3 install --no-cache-dir -r ${FUNCTION_DIR}/requirements.txt
