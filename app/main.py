@@ -3,6 +3,8 @@
 # For local run: uvicorn main:app --reload
 # Check: http://localhost:8000/docs
 
+import os
+
 from pydantic import BaseModel
 from fastapi import FastAPI
 from mangum import Mangum
@@ -40,7 +42,8 @@ def create_user(user: User):
 def root():
     return {
         "statusCode": 200,
-        "message": "root GET method OK"
+        "message": "root GET method OK",
+        "env": os.getenv("KEY")
     }
 
 handler = Mangum(app)
