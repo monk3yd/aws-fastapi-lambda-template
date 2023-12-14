@@ -15,6 +15,7 @@ from loguru import logger
 
 app = FastAPI(title="fastapi-lambda-template")
 
+# TODO: CORS configuration (see: autotramite)
 
 # Move to models.py or models/ dir as necessary
 class User(BaseModel):
@@ -46,6 +47,20 @@ def root():
         "message": "root GET method OK",
         "env": os.getenv("KEY")
     }
+
+
+# See: cotizador-seguros
+
+# TODO: invoke lambda (sync)
+
+# TODO: invoke lambda (async)
+
+# TODO: EC2 server
+
+# TODO: batch payload
+
+# TODO: stepfunctions
+
 
 handler = Mangum(app)
 
