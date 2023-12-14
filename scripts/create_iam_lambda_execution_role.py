@@ -7,9 +7,6 @@ import os
 from datetime import datetime
 from loguru import logger
 
-from utils import generate_role_name, serialize_datetime
-
-
 # ------------- AWS Settings ----------------
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -50,6 +47,24 @@ def main():
     # Save role data
     with open("scripts/data/iam_role.json", "w") as file:
         file.write(json.dumps(response, default=serialize_datetime))
+
+def generate_role_name(project_name):
+    """Generate automatic role name from project name"""
+    role_names = [] 
+    names = project_name.split("-")
+    for name in names:
+        name_part = name.capitalize()
+        role_names.append(name_part)
+
+    # Role name
+    return "".join(role_names)
+
+
+def serialize_datetime(obj):
+    """Serialize datetime objects for JSON compatibility"""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError("Type not serializable")
 
 
 if __name__ == "__main__":

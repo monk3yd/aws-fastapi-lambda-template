@@ -1,8 +1,8 @@
 #!/bin/bash
 
-### Deploy docker image to AWS ECR repository.
+### Deploy docker image to AWS ECR repository + Update lambda function with uploaded image.
 
-# Variables
+# Env variables
 ACCOUNT_ID=${AWS_ACCOUNT_ID}
 REGION_NAME=${AWS_REGION_NAME}
 IMAGE_NAME=${PROJECT_NAME}
@@ -22,11 +22,15 @@ docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazo
 # Push docker image to ECR
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG}
 
+# Update lambda function with ECR image
+aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} --region ${REGION_NAME}
+
+# Save image ID
 echo ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} > scripts/data/ecr_repo_${IMAGE_TAG}.txt
 
 
 ## Experimental image
-# IMAGE_TAG="experimental"
+IMAGE_TAG="experimental"
 
 # Login
 # aws ecr get-login-password --region ${REGION_NAME} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com
@@ -39,6 +43,10 @@ echo ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TA
 
 # Push docker image to ECR
 # docker push ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG}
+
+# Update lambda function with ECR image
+aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} --region ${REGION_NAME}
+
 
 # echo ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} > scripts/data/ecr_repo_${IMAGE_TAG}.txt
 

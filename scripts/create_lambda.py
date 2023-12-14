@@ -22,7 +22,7 @@ WORKFLOW: str = "ecr"
 
 LAMBDA_NAME = PROJECT_NAME
 LAMBDA_RUNTIME = "python3.11"
-LAMBDA_HANDLER = "main.handler"
+LAMBDA_HANDLER = "handler.app"
 LAMBDA_TIMEOUT = 300  # 5min
 
 
@@ -39,41 +39,15 @@ def main():
     iam_client = session.client("iam")
     lambda_client = session.client("lambda")
 
+    role_name = generate_role_name(PROJECT_NAME)
+
     # Import IAM role for basic lambda execution
-    role = iam_client.get_role(RoleName="LambdaBasicExecution")
-
-    if WORKFLOW == "local":
-        # Upload directly zip code and dependencies
-        with open("lambda.zip", "rb") as file:
-            zipped_code = file.read()
-
-        # upload zip file stored locally when creating lambda
-        workflow_config = {"Code": {"ZipFile": zipped_code}, "PackageType": "Zip"}
-
-    if WORKFLOW == "s3":
-        # use zip file stored in S3 when creating lambda
-        workflow_config = {
-            "Code": {
-                "S3Bucket": "roilab",
-                "S3Key": "source/spider-api-manager-lambda.zip",
-            },
-            "PackageType": "Zip",
-        }
-
-        basic_config = {
-            "FunctionName": LAMBDA_NAME,
-            "Runtime": LAMBDA_RUNTIME,
-            "Role": role["Role"]["Arn"],
-            "Handler": LAMBDA_HANDLER,
-            "Timeout": LAMBDA_TIMEOUT,  # Maximum allowable timeout
-            # Set up Lambda function environment variables
-            # "Environment": {
-            #     "Variables": {"Name": "helloWorldLambda", "Environment": "prod"}
-            # },
-        }
+    role = iam_client.get_role(RoleName=f"LambdaBasicExecution{role_name}")
 
     if WORKFLOW == "ecr":
-        branches = ["main", "experimental"]
+        # TODO:
+        # branches = ["main", "experimental"]
+        branches = ["main"]
         for branch in branches:
             # Main lambda
             with open(f"scripts/data/ecr_repo_{branch}.txt", "r") as file:
@@ -108,6 +82,49 @@ def main():
 
             with open(f"scripts/data/{filename}", "w") as file:
                 file.write(json.dumps(response))
+
+    if WORKFLOW == "s3":
+        # use zip file stored in S3 when creating lambda
+        workflow_config = {
+            "Code": {
+                "S3Bucket": "roilab",
+                "S3Key": "source/spider-api-manager-lambda.zip",
+            },
+            "PackageType": "Zip",
+        }
+
+        basic_config = {
+            "FunctionName": LAMBDA_NAME,
+            "Runtime": LAMBDA_RUNTIME,
+            "Role": role["Role"]["Arn"],
+            "Handler": LAMBDA_HANDLER,
+            "Timeout": LAMBDA_TIMEOUT,  # Maximum allowable timeout
+            # Set up Lambda function environment variables
+            # "Environment": {
+            #     "Variables": {"Name": "helloWorldLambda", "Environment": "prod"}
+            # },
+        }
+
+
+    if WORKFLOW == "local":
+        # Upload directly zip code and dependencies
+        with open("lambda.zip", "rb") as file:
+            zipped_code = file.read()
+
+        # upload zip file stored locally when creating lambda
+        workflow_config = {"Code": {"ZipFile": zipped_code}, "PackageType": "Zip"}
+
+
+def generate_role_name(project_name):
+    """Generate automatic role name from project name"""
+    role_names = [] 
+    names = project_name.split("-")
+    for name in names:
+        name_part = name.capitalize()
+        role_names.append(name_part)
+
+    # Role name
+    return "".join(role_names)
 
 
 if __name__ == "__main__":

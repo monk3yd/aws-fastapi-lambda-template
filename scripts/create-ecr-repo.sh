@@ -1,8 +1,6 @@
-#!/bin/bash
-
 ### Create ECR repository in AWS.
 
-# Variables
+# Env variables
 ACCOUNT_ID=${AWS_ACCOUNT_ID}
 REGION_NAME=${AWS_REGION_NAME}
 ECR_NAME=${PROJECT_NAME}
