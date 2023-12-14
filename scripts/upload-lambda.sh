@@ -28,9 +28,11 @@ aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri ${AWS_
 # Save image ID
 echo ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} > scripts/data/ecr_repo_${IMAGE_TAG}.txt
 
+# Update lambda function with ECR image
+aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} --region ${REGION_NAME}
 
 ## Experimental image
-IMAGE_TAG="experimental"
+# IMAGE_TAG="experimental"
 
 # Login
 # aws ecr get-login-password --region ${REGION_NAME} | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com
@@ -43,9 +45,6 @@ IMAGE_TAG="experimental"
 
 # Push docker image to ECR
 # docker push ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG}
-
-# Update lambda function with ECR image
-aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} --region ${REGION_NAME}
 
 
 # echo ${ACCOUNT_ID}.dkr.ecr.${REGION_NAME}.amazonaws.com/${IMAGE_NAME}:${IMAGE_TAG} > scripts/data/ecr_repo_${IMAGE_TAG}.txt
